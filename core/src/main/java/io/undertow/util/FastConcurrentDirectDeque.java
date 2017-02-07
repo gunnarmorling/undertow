@@ -25,20 +25,17 @@
 package io.undertow.util;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import sun.misc.Unsafe;
-
 /**
- * A modified version of ConcurrentLinkedDequeue which includes direct
- * removal. Like the original, it relies on Unsafe for better performance.
+ * A modified version of ConcurrentLinkedDeque which includes direct
+ * removal. Like the original, it relies on VarHandle for better performance.
  *
  * More specifically, an unbounded concurrent {@linkplain Deque deque} based on linked nodes.
  * Concurrent insertion, removal, and access operations execute safely
@@ -299,60 +296,45 @@ public class FastConcurrentDirectDeque<E>
          * only be seen after publication via casNext or casPrev.
          */
         Node(E item) {
-            UNSAFE.putObject(this, itemOffset, item);
+            ITEM.set(this, item);
         }
 
         boolean casItem(E cmp, E val) {
-            return UNSAFE.compareAndSwapObject(this, itemOffset, cmp, val);
+            return ITEM.compareAndSet(this, cmp, val);
         }
 
         void lazySetNext(Node<E> val) {
-            UNSAFE.putOrderedObject(this, nextOffset, val);
+            NEXT.set(this, val);
         }
 
         boolean casNext(Node<E> cmp, Node<E> val) {
-            return UNSAFE.compareAndSwapObject(this, nextOffset, cmp, val);
+            return NEXT.compareAndSet(this, cmp, val);
         }
 
         void lazySetPrev(Node<E> val) {
-            UNSAFE.putOrderedObject(this, prevOffset, val);
+            PREV.set(this, val);
         }
 
         boolean casPrev(Node<E> cmp, Node<E> val) {
-            return UNSAFE.compareAndSwapObject(this, prevOffset, cmp, val);
+            return PREV.compareAndSet(this, cmp, val);
         }
 
-        // Unsafe mechanics
+        // Varhandle mechanics
 
-        private static final sun.misc.Unsafe UNSAFE;
-        private static final long prevOffset;
-        private static final long itemOffset;
-        private static final long nextOffset;
+        private static final VarHandle PREV;
+        private static final VarHandle ITEM;
+        private static final VarHandle NEXT;
 
         static {
             try {
-                UNSAFE = getUnsafe();
+                MethodHandles.Lookup l = MethodHandles.lookup();
                 Class<?> k = Node.class;
-                prevOffset = UNSAFE.objectFieldOffset
-                    (k.getDeclaredField("prev"));
-                itemOffset = UNSAFE.objectFieldOffset
-                    (k.getDeclaredField("item"));
-                nextOffset = UNSAFE.objectFieldOffset
-                    (k.getDeclaredField("next"));
+                PREV = l.findVarHandle(k, "prev", Node.class);
+                ITEM = l.findVarHandle(k, "item", Object.class);
+                NEXT = l.findVarHandle(k, "next", Node.class);
             } catch (Exception e) {
                 throw new Error(e);
             }
-        }
-
-        private static Unsafe getUnsafe() {
-            if (System.getSecurityManager() != null) {
-                return AccessController.doPrivileged(new PrivilegedAction<Unsafe>() {
-                    public Unsafe run() {
-                        return getUnsafe0();
-                    }
-                });
-            }
-            return getUnsafe0();
         }
     }
 
@@ -1490,53 +1472,29 @@ public class FastConcurrentDirectDeque<E>
     }
 
     private boolean casHead(Node<E> cmp, Node<E> val) {
-        return UNSAFE.compareAndSwapObject(this, headOffset, cmp, val);
+        return HEAD.compareAndSet(this, cmp, val);
     }
 
     private boolean casTail(Node<E> cmp, Node<E> val) {
-        return UNSAFE.compareAndSwapObject(this, tailOffset, cmp, val);
+        return TAIL.compareAndSet(this, cmp, val);
     }
 
-    // Unsafe mechanics
+    // VarHandle mechanics
+    private static final VarHandle HEAD;
+    private static final VarHandle TAIL;
 
-    private static final sun.misc.Unsafe UNSAFE;
-    private static final long headOffset;
-    private static final long tailOffset;
     static {
         PREV_TERMINATOR = new Node<>();
         PREV_TERMINATOR.next = PREV_TERMINATOR;
         NEXT_TERMINATOR = new Node<>();
         NEXT_TERMINATOR.prev = NEXT_TERMINATOR;
         try {
-            UNSAFE = getUnsafe();
+            MethodHandles.Lookup l = MethodHandles.lookup();
             Class<?> k = FastConcurrentDirectDeque.class;
-            headOffset = UNSAFE.objectFieldOffset
-                (k.getDeclaredField("head"));
-            tailOffset = UNSAFE.objectFieldOffset
-                (k.getDeclaredField("tail"));
+            HEAD = l.findVarHandle(k, "head", Node.class);
+            TAIL = l.findVarHandle(k, "tail", Node.class);
         } catch (Exception e) {
             throw new Error(e);
-        }
-    }
-
-    private static Unsafe getUnsafe() {
-        if (System.getSecurityManager() != null) {
-            return new PrivilegedAction<Unsafe>() {
-                public Unsafe run() {
-                    return getUnsafe0();
-                }
-            }.run();
-        }
-        return getUnsafe0();
-    }
-
-    private static Unsafe getUnsafe0()  {
-        try {
-            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafe.setAccessible(true);
-            return (Unsafe) theUnsafe.get(null);
-        } catch (Throwable t) {
-            throw new RuntimeException("JDK did not allow accessing unsafe", t);
         }
     }
 }

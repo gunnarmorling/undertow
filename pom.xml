@@ -104,8 +104,8 @@
         <version.org.eclipse.jetty.alpn>1.0.0</version.org.eclipse.jetty.alpn>
 
         <jdk.min.version>1.8</jdk.min.version>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>9</maven.compiler.target>
+        <maven.compiler.source>9</maven.compiler.source>
         <version.com.twitter.hpack>0.10.1</version.com.twitter.hpack>
 
         <!-- Non-default maven plugin versions and configuration -->
@@ -349,7 +349,7 @@
                 <artifactId>apacheds-all</artifactId>
                 <version>${version.org.apache.directory.server}</version>
                 <scope>test</scope>
-            </dependency>            
+            </dependency>
 
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
@@ -498,6 +498,8 @@
                                 <compilerArgs>
                                     <arg>-J--add-modules</arg>
                                     <arg>-Jjava.annotations.common</arg>
+                                    <arg>-J--add-opens</arg>
+                                    <arg>-Jjava.base/java.lang=ALL-UNNAMED</arg>
                                 </compilerArgs>
                             </configuration>
                         </plugin>
