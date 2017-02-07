@@ -878,6 +878,7 @@ public class FastConcurrentDirectDeque<E>
      *
      * @throws NullPointerException if the specified element is null
      */
+    @Override
     public void addFirst(E e) {
         linkFirst(e);
     }
@@ -891,6 +892,7 @@ public class FastConcurrentDirectDeque<E>
      *
      * @throws NullPointerException if the specified element is null
      */
+    @Override
     public void addLast(E e) {
         linkLast(e);
     }
@@ -902,19 +904,23 @@ public class FastConcurrentDirectDeque<E>
      * @return {@code true} (as specified by {@link Deque#offerFirst})
      * @throws NullPointerException if the specified element is null
      */
+    @Override
     public boolean offerFirst(E e) {
         linkFirst(e);
         return true;
     }
 
+    @Override
     public Object offerFirstAndReturnToken(E e) {
         return linkFirst(e);
     }
 
+    @Override
     public Object offerLastAndReturnToken(E e) {
         return linkLast(e);
     }
 
+    @Override
     public void removeToken(Object token) {
         if (!(token instanceof Node)) {
             throw new IllegalArgumentException();
@@ -934,11 +940,13 @@ public class FastConcurrentDirectDeque<E>
      * @return {@code true} (as specified by {@link Deque#offerLast})
      * @throws NullPointerException if the specified element is null
      */
+    @Override
     public boolean offerLast(E e) {
         linkLast(e);
         return true;
     }
 
+    @Override
     public E peekFirst() {
         for (Node<E> p = first(); p != null; p = succ(p)) {
             E item = p.item;
@@ -948,6 +956,7 @@ public class FastConcurrentDirectDeque<E>
         return null;
     }
 
+    @Override
     public E peekLast() {
         for (Node<E> p = last(); p != null; p = pred(p)) {
             E item = p.item;
@@ -960,6 +969,7 @@ public class FastConcurrentDirectDeque<E>
     /**
      * @throws NoSuchElementException {@inheritDoc}
      */
+    @Override
     public E getFirst() {
         return screenNullResult(peekFirst());
     }
@@ -967,10 +977,12 @@ public class FastConcurrentDirectDeque<E>
     /**
      * @throws NoSuchElementException {@inheritDoc}
      */
+    @Override
     public E getLast() {
         return screenNullResult(peekLast());
     }
 
+    @Override
     public E pollFirst() {
         for (Node<E> p = first(); p != null; p = succ(p)) {
             E item = p.item;
@@ -982,6 +994,7 @@ public class FastConcurrentDirectDeque<E>
         return null;
     }
 
+    @Override
     public E pollLast() {
         for (Node<E> p = last(); p != null; p = pred(p)) {
             E item = p.item;
@@ -996,6 +1009,7 @@ public class FastConcurrentDirectDeque<E>
     /**
      * @throws NoSuchElementException {@inheritDoc}
      */
+    @Override
     public E removeFirst() {
         return screenNullResult(pollFirst());
     }
@@ -1003,6 +1017,7 @@ public class FastConcurrentDirectDeque<E>
     /**
      * @throws NoSuchElementException {@inheritDoc}
      */
+    @Override
     public E removeLast() {
         return screenNullResult(pollLast());
     }
@@ -1016,6 +1031,7 @@ public class FastConcurrentDirectDeque<E>
      * @return {@code true} (as specified by {@link java.util.Queue#offer})
      * @throws NullPointerException if the specified element is null
      */
+    @Override
     public boolean offer(E e) {
         return offerLast(e);
     }
@@ -1028,30 +1044,37 @@ public class FastConcurrentDirectDeque<E>
      * @return {@code true} (as specified by {@link Collection#add})
      * @throws NullPointerException if the specified element is null
      */
+    @Override
     public boolean add(E e) {
         return offerLast(e);
     }
 
+    @Override
     public E poll() {
         return pollFirst();
     }
 
+    @Override
     public E remove() {
         return removeFirst();
     }
 
+    @Override
     public E peek() {
         return peekFirst();
     }
 
+    @Override
     public E element() {
         return getFirst();
     }
 
+    @Override
     public void push(E e) {
         addFirst(e);
     }
 
+    @Override
     public E pop() {
         return removeFirst();
     }
@@ -1065,6 +1088,7 @@ public class FastConcurrentDirectDeque<E>
      * @return {@code true} if the deque contained the specified element
      * @throws NullPointerException if the specified element is null
      */
+    @Override
     public boolean removeFirstOccurrence(Object o) {
         checkNotNull(o);
         for (Node<E> p = first(); p != null; p = succ(p)) {
@@ -1086,6 +1110,7 @@ public class FastConcurrentDirectDeque<E>
      * @return {@code true} if the deque contained the specified element
      * @throws NullPointerException if the specified element is null
      */
+    @Override
     public boolean removeLastOccurrence(Object o) {
         checkNotNull(o);
         for (Node<E> p = last(); p != null; p = pred(p)) {
@@ -1105,6 +1130,7 @@ public class FastConcurrentDirectDeque<E>
      * @param o element whose presence in this deque is to be tested
      * @return {@code true} if this deque contains the specified element
      */
+    @Override
     public boolean contains(Object o) {
         if (o == null) return false;
         for (Node<E> p = first(); p != null; p = succ(p)) {
@@ -1120,6 +1146,7 @@ public class FastConcurrentDirectDeque<E>
      *
      * @return {@code true} if this collection contains no elements
      */
+    @Override
     public boolean isEmpty() {
         return peekFirst() == null;
     }
@@ -1140,6 +1167,7 @@ public class FastConcurrentDirectDeque<E>
      *
      * @return the number of elements in this deque
      */
+    @Override
     public int size() {
         int count = 0;
         for (Node<E> p = first(); p != null; p = succ(p))
@@ -1159,6 +1187,7 @@ public class FastConcurrentDirectDeque<E>
      * @return {@code true} if the deque contained the specified element
      * @throws NullPointerException if the specified element is null
      */
+    @Override
     public boolean remove(Object o) {
         return removeFirstOccurrence(o);
     }
@@ -1175,6 +1204,7 @@ public class FastConcurrentDirectDeque<E>
      *         of its elements are null
      * @throws IllegalArgumentException if the collection is this deque
      */
+    @Override
     public boolean addAll(Collection<? extends E> c) {
         if (c == this)
             // As historically specified in AbstractQueue#addAll
@@ -1230,6 +1260,7 @@ public class FastConcurrentDirectDeque<E>
     /**
      * Removes all of the elements from this deque.
      */
+    @Override
     public void clear() {
         while (pollFirst() != null) { }
     }
@@ -1247,6 +1278,7 @@ public class FastConcurrentDirectDeque<E>
      *
      * @return an array containing all of the elements in this deque
      */
+    @Override
     public Object[] toArray() {
         return toArrayList().toArray();
     }
@@ -1288,6 +1320,7 @@ public class FastConcurrentDirectDeque<E>
      *         this deque
      * @throws NullPointerException if the specified array is null
      */
+    @Override
     public <T> T[] toArray(T[] a) {
         return toArrayList().toArray(a);
     }
@@ -1305,6 +1338,7 @@ public class FastConcurrentDirectDeque<E>
      *
      * @return an iterator over the elements in this deque in proper sequence
      */
+    @Override
     public Iterator<E> iterator() {
         return new Itr();
     }
@@ -1323,6 +1357,7 @@ public class FastConcurrentDirectDeque<E>
      *
      * @return an iterator over the elements in this deque in reverse order
      */
+    @Override
     public Iterator<E> descendingIterator() {
         return new DescendingItr();
     }
@@ -1378,10 +1413,12 @@ public class FastConcurrentDirectDeque<E>
             }
         }
 
+        @Override
         public boolean hasNext() {
             return nextItem != null;
         }
 
+        @Override
         public E next() {
             E item = nextItem;
             if (item == null) throw new NoSuchElementException();
@@ -1389,6 +1426,7 @@ public class FastConcurrentDirectDeque<E>
             return item;
         }
 
+        @Override
         public void remove() {
             Node<E> l = lastRet;
             if (l == null) throw new IllegalStateException();
@@ -1402,10 +1440,12 @@ public class FastConcurrentDirectDeque<E>
      * Forward iterator
      */
     private class Itr extends AbstractItr {
+        @Override
         Node<E> startNode() {
             return first();
         }
 
+        @Override
         Node<E> nextNode(Node<E> p) {
             return succ(p);
         }
@@ -1415,10 +1455,12 @@ public class FastConcurrentDirectDeque<E>
      * Descending iterator
      */
     private class DescendingItr extends AbstractItr {
+        @Override
         Node<E> startNode() {
             return last();
         }
 
+        @Override
         Node<E> nextNode(Node<E> p) {
             return pred(p);
         }
